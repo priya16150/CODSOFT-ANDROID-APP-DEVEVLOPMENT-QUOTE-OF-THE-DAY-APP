@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Quote Creator · Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: #0a0a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .rotating-glow {
+      position: fixed; top: 50%; left: 50%;
+      width: 600px; height: 600px;
+      margin-top: -300px; margin-left: -300px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #ff6b6b, #f06595, #cc5de8, #845ef7, #5f3dc9, #845ef7, #cc5de8, #f06595, #ff6b6b);
+      filter: blur(70px);
+      opacity: 0.4;
+      animation: spinGlow 12s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes spinGlow { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+    .rotating-ring {
+      position: fixed; top: 50%; left: 50%;
+      width: 400px; height: 400px;
+      margin-top: -200px; margin-left: -200px;
+      border-radius: 50%;
+      border: 2px solid rgba(155,107,204,0.5);
+      box-shadow: 0 0 30px rgba(155,107,204,0.5);
+      animation: spinRingReverse 10s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes spinRingReverse { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+    .floating-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+    }
+    .orb-bg {
+      position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(155,107,204,0.15), transparent);
+      filter: blur(50px); animation: floatOrb 20s infinite alternate;
+    }
+    .orb1 { width: 400px; height: 400px; top: -150px; left: -150px; }
+    .orb2 { width: 500px; height: 500px; bottom: -200px; right: -200px; animation-duration: 30s; }
+    .orb3 { width: 300px; height: 300px; top: 50%; left: 20%; animation-duration: 18s; }
+    @keyframes floatOrb { 100% { transform: translate(60px,60px) scale(1.2); opacity: 0.6; } }
+    .float-item {
+      position: absolute; font-size: 1.2rem; opacity: 0;
+      animation: floatPositive 12s linear infinite; pointer-events: none;
+    }
+    .float-item:nth-child(1) { top: 10%; left: 5%; animation-duration: 14s; font-size: 1.8rem; }
+    .float-item:nth-child(2) { top: 20%; left: 85%; animation-duration: 18s; font-size: 2rem; }
+    .float-item:nth-child(3) { top: 70%; left: 15%; animation-duration: 16s; font-size: 1.5rem; }
+    .float-item:nth-child(4) { top: 80%; left: 75%; animation-duration: 20s; font-size: 2.2rem; }
+    .float-item:nth-child(5) { top: 40%; left: 45%; animation-duration: 15s; font-size: 1.6rem; }
+    .float-item:nth-child(6) { top: 60%; left: 92%; animation-duration: 22s; font-size: 1.4rem; }
+    @keyframes floatPositive {
+      0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { transform: translateY(-100vh) rotate(360deg) scale(1.2); opacity: 0; }
+    }
+    .stars {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+    }
+    .star {
+      position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px;
+      opacity: 0.6; animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle { 100% { opacity: 1; transform: scale(1.2); } }
+    .dashboard-container {
+      max-width: 800px;
+      width: 100%;
+      margin: auto;
+      position: relative;
+      z-index: 10;
+    }
+    .card {
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 2rem 1.8rem;
+      border: 1px solid rgba(255,255,240,0.6);
+      box-shadow: 0 25px 45px -12px rgba(0,0,0,0.25);
+      animation: fadeInUp 0.6s ease;
+    }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .input-group { text-align: left; margin-bottom: 1.2rem; }
+    .input-group label { display: block; font-weight: 500; margin-bottom: 5px; color: #3d2a58; }
+    .input-group input, .input-group textarea {
+      width: 100%; padding: 12px 18px; border-radius: 60px; border: 1px solid #d9c8f0;
+      background: white; font-size: 0.95rem;
+    }
+    .input-group textarea { border-radius: 24px; resize: vertical; }
+    button {
+      background: #7c4dff; color: white; border: none; padding: 10px 20px;
+      border-radius: 60px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+      transition: 0.2s; position: relative; overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    button:hover { background: #6a3de8; transform: translateY(-2px); }
+    button::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    button:hover::before { left: 100%; }
+    .btn-outline {
+      background: transparent; border: 1px solid #7c4dff; color: #7c4dff;
+    }
+    .btn-outline:hover { background: #7c4dff; color: white; }
+    .two-buttons { display: flex; gap: 1rem; margin: 0.5rem 0 1rem; }
+    .two-buttons button { margin: 0; }
+    .scroll-list {
+      max-height: 280px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+      padding-right: 5px;
+      scrollbar-width: thin;
+    }
+    .scroll-list::-webkit-scrollbar { width: 5px; }
+    .scroll-list::-webkit-scrollbar-track { background: #e0d4f5; border-radius: 10px; }
+    .scroll-list::-webkit-scrollbar-thumb { background: #9b6bcc; border-radius: 10px; }
+    .quote-item {
+      background: white;
+      border-radius: 20px;
+      padding: 0.8rem;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s;
+    }
+    .quote-item:hover { transform: translateX(4px); }
+    .delete-quote { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 1rem; padding: 0 8px; width: auto; margin: 0; }
+    .delete-quote:hover { color: #ff4757; transform: scale(1.1); background: none; }
+    .quote-meta { font-size: 0.7rem; color: #a28fc2; margin-top: 0.3rem; }
+    hr { margin: 1rem 0; border-color: rgba(0,0,0,0.05); }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #1e1428e6; color: white; padding: 10px 24px; border-radius: 40px;
+      font-size: 0.85rem; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 1000;
+    }
+    .toast.show { opacity: 1; }
+    @media (max-width: 550px) { .card { padding: 1.5rem; } .two-buttons { flex-direction: column; gap: 0.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="rotating-glow"></div><div class="rotating-ring"></div>
+  <div class="floating-bg">
+    <div class="orb-bg orb1"></div><div class="orb-bg orb2"></div><div class="orb-bg orb3"></div>
+    <div class="float-item">✨</div><div class="float-item">❤️</div><div class="float-item">🌟</div>
+    <div class="float-item">🕊️</div><div class="float-item">⭐</div><div class="float-item">💖</div>
+  </div>
+  <div class="stars" id="stars"></div>
+  <div class="dashboard-container" id="dashboardContainer"></div>
+  <div id="toastMsg" class="toast"></div>
+
+  <script>
+    const STORAGE_CURRENT_USER = 'whisper_current_user';
+    const STORAGE_QUOTES = 'creator_quotes';  // Must match user dashboard
+
+    let currentUser = null;
+    let allQuotes = [];
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
+
+    function loadQuotes() {
+      const stored = localStorage.getItem(STORAGE_QUOTES);
+      if (stored) allQuotes = JSON.parse(stored);
+      else {
+        allQuotes = [
+          { id: Date.now()+1, text: "The only limit is your mind.", author: "Anonymous", creatorName: "Daily Whisper", timestamp: Date.now() },
+          { id: Date.now()+2, text: "Every day is a new beginning.", author: "Daily Whisper", creatorName: "Daily Whisper", timestamp: Date.now() }
+        ];
+        saveQuotes();
+      }
+    }
+    function saveQuotes() { localStorage.setItem(STORAGE_QUOTES, JSON.stringify(allQuotes)); }
+
+    function renderCommunityQuotes() {
+      const container = document.getElementById('communityList');
+      if (!container) return;
+      if (allQuotes.length === 0) { container.innerHTML = '<p>No quotes yet. Be the first to post!</p>'; return; }
+      container.innerHTML = allQuotes.map(q => `
+        <div class="quote-item">
+          <div>“${escapeHtml(q.text)}”</div>
+          <div style="font-size:0.8rem; color:#6b4f8f;">— ${escapeHtml(q.author)}</div>
+          <div class="quote-meta">✨ by ${escapeHtml(q.creatorName)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderMyQuotes() {
+      const container = document.getElementById('myQuotesList');
+      if (!currentUser) { container.innerHTML = '<p>Please login to see your quotes.</p>'; return; }
+      const myQuotes = allQuotes.filter(q => q.creatorName === currentUser.name || q.creatorEmail === currentUser.email);
+      if (myQuotes.length === 0) { container.innerHTML = '<p>You haven\'t posted any quotes yet.</p>'; return; }
+      container.innerHTML = myQuotes.map(q => `
+        <div class="quote-item" style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="flex:1;">
+            <div>“${escapeHtml(q.text)}”</div>
+            <div style="font-size:0.8rem; color:#6b4f8f;">— ${escapeHtml(q.author)}</div>
+            <div class="quote-meta">Posted on ${new Date(q.timestamp).toLocaleDateString()}</div>
+          </div>
+          <button class="delete-quote" data-id="${q.id}"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      `).join('');
+      document.querySelectorAll('.delete-quote').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(btn.dataset.id);
+          allQuotes = allQuotes.filter(q => q.id !== id);
+          saveQuotes();
+          renderCommunityQuotes();
+          renderMyQuotes();
+          showToast('Quote deleted');
+        });
+      });
+    }
+
+    function showCommunityTab() {
+      document.getElementById('communityList').classList.remove('hidden');
+      document.getElementById('myQuotesList').classList.add('hidden');
+      renderCommunityQuotes();
+    }
+    function showMyQuotesTab() {
+      document.getElementById('communityList').classList.add('hidden');
+      document.getElementById('myQuotesList').classList.remove('hidden');
+      renderMyQuotes();
+    }
+
+    function postQuote(text, author) {
+      if (!text.trim()) { showToast('Please write a quote'); return false; }
+      if (!currentUser) { showToast('You must be logged in'); return false; }
+      const newQuote = {
+        id: Date.now(),
+        text: text.trim(),
+        author: author.trim() || 'Anonymous',
+        creatorName: currentUser.name,
+        creatorEmail: currentUser.email,
+        timestamp: Date.now()
+      };
+      allQuotes.unshift(newQuote);
+      saveQuotes();
+      showToast('✨ Quote posted!');
+      return true;
+    }
+
+    function logout() {
+      localStorage.removeItem(STORAGE_CURRENT_USER);
+      window.location.href = 'login.html';
+    }
+
+    function checkLogin() {
+      const stored = localStorage.getItem(STORAGE_CURRENT_USER);
+      if (!stored) {
+        document.getElementById('dashboardContainer').innerHTML = `
+          <div class="card" style="text-align:center;">
+            <i class="fas fa-exclamation-triangle" style="font-size:3rem; color:#ff6b6b;"></i>
+            <h2>Not Logged In</h2>
+            <p style="margin:1rem 0;">Please login to access Creator Dashboard.</p>
+            <button onclick="window.location.href='login.html'" style="width:auto; padding:10px 24px;">Go to Login</button>
+          </div>
+        `;
+        return false;
+      }
+      currentUser = JSON.parse(stored);
+      if (!currentUser.name) currentUser.name = currentUser.email.split('@')[0];
+      document.getElementById('dashboardContainer').innerHTML = `
+        <div class="card">
+          <div class="flex-between">
+            <h2><i class="fas fa-pen-fancy"></i> Creator Dashboard</h2>
+            <button id="logoutBtn" class="btn-outline" style="width:auto; padding:4px 12px;">Logout</button>
+          </div>
+          <div class="input-group"><label><i class="fas fa-quote-left"></i> New Quote</label><textarea id="newQuoteText" rows="2" placeholder="Write your inspiring quote..."></textarea></div>
+          <div class="input-group"><label>Author (optional)</label><input type="text" id="newQuoteAuthor" placeholder="Anonymous"></div>
+          <button id="postQuoteBtn"><i class="fas fa-sparkles"></i> Post Quote</button>
+          <hr>
+          <div class="two-buttons">
+            <button id="showCommunityBtn" class="btn-outline">🌍 Community Quotes</button>
+            <button id="showMyQuotesBtn" class="btn-outline">📝 My Quotes</button>
+          </div>
+          <div id="communityList" class="scroll-list">Loading...</div>
+          <div id="myQuotesList" class="scroll-list hidden">Loading...</div>
+        </div>
+      `;
+      return true;
+    }
+
+    // Generate stars
+    const starsDiv = document.getElementById('stars');
+    for (let i=0; i<150; i++) {
+      const s = document.createElement('div'); s.classList.add('star');
+      s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
+      s.style.animationDelay = Math.random()*5+'s'; s.style.width = Math.random()*3+1+'px';
+      s.style.height = s.style.width; starsDiv.appendChild(s);
+    }
+
+    if (checkLogin()) {
+      loadQuotes();
+      renderCommunityQuotes();
+      showCommunityTab();
+      document.getElementById('postQuoteBtn').onclick = () => {
+        const text = document.getElementById('newQuoteText').value;
+        const author = document.getElementById('newQuoteAuthor').value;
+        if (postQuote(text, author)) {
+          document.getElementById('newQuoteText').value = '';
+          document.getElementById('newQuoteAuthor').value = '';
+          renderCommunityQuotes();
+          if (!document.getElementById('myQuotesList').classList.contains('hidden')) renderMyQuotes();
+        }
+      };
+      document.getElementById('showCommunityBtn').onclick = showCommunityTab;
+      document.getElementById('showMyQuotesBtn').onclick = showMyQuotesTab;
+      document.getElementById('logoutBtn').onclick = logout;
+    }
+  </script>
+</body>
+</html>

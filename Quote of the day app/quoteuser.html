@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Quote User · Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: #0a0a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .rotating-glow {
+      position: fixed; top: 50%; left: 50%;
+      width: 600px; height: 600px;
+      margin-top: -300px; margin-left: -300px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #ff6b6b, #f06595, #cc5de8, #845ef7, #5f3dc9, #845ef7, #cc5de8, #f06595, #ff6b6b);
+      filter: blur(70px);
+      opacity: 0.4;
+      animation: spinGlow 12s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes spinGlow { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+    .rotating-ring {
+      position: fixed; top: 50%; left: 50%;
+      width: 400px; height: 400px;
+      margin-top: -200px; margin-left: -200px;
+      border-radius: 50%;
+      border: 2px solid rgba(155,107,204,0.5);
+      box-shadow: 0 0 30px rgba(155,107,204,0.5);
+      animation: spinRingReverse 10s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes spinRingReverse { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+    .floating-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+    }
+    .orb-bg {
+      position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(155,107,204,0.15), transparent);
+      filter: blur(50px); animation: floatOrb 20s infinite alternate;
+    }
+    .orb1 { width: 400px; height: 400px; top: -150px; left: -150px; }
+    .orb2 { width: 500px; height: 500px; bottom: -200px; right: -200px; animation-duration: 30s; }
+    .orb3 { width: 300px; height: 300px; top: 50%; left: 20%; animation-duration: 18s; }
+    @keyframes floatOrb { 100% { transform: translate(60px,60px) scale(1.2); opacity: 0.6; } }
+    .float-item {
+      position: absolute; font-size: 1.2rem; opacity: 0;
+      animation: floatPositive 12s linear infinite; pointer-events: none;
+    }
+    .float-item:nth-child(1) { top: 10%; left: 5%; animation-duration: 14s; font-size: 1.8rem; }
+    .float-item:nth-child(2) { top: 20%; left: 85%; animation-duration: 18s; font-size: 2rem; }
+    .float-item:nth-child(3) { top: 70%; left: 15%; animation-duration: 16s; font-size: 1.5rem; }
+    .float-item:nth-child(4) { top: 80%; left: 75%; animation-duration: 20s; font-size: 2.2rem; }
+    .float-item:nth-child(5) { top: 40%; left: 45%; animation-duration: 15s; font-size: 1.6rem; }
+    .float-item:nth-child(6) { top: 60%; left: 92%; animation-duration: 22s; font-size: 1.4rem; }
+    @keyframes floatPositive {
+      0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { transform: translateY(-100vh) rotate(360deg) scale(1.2); opacity: 0; }
+    }
+    .stars {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+    }
+    .star {
+      position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px;
+      opacity: 0.6; animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle { 100% { opacity: 1; transform: scale(1.2); } }
+    .dashboard-container {
+      max-width: 800px;
+      width: 100%;
+      margin: auto;
+      position: relative;
+      z-index: 10;
+    }
+    .card {
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 2rem 1.8rem;
+      border: 1px solid rgba(255,255,240,0.6);
+      box-shadow: 0 25px 45px -12px rgba(0,0,0,0.25);
+      animation: fadeInUp 0.6s ease;
+    }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .quote-text {
+      font-size: 1.5rem; font-weight: 500; margin: 1.5rem 0 0.5rem; color: #2c1e3c;
+      line-height: 1.4;
+    }
+    .quote-author { font-size: 1rem; color: #6b4f8f; margin-bottom: 1.5rem; }
+    .action-buttons {
+      display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #7c4dff; color: white; border: none; padding: 10px 20px;
+      border-radius: 60px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+      transition: 0.2s; position: relative; overflow: hidden;
+    }
+    button:hover { background: #6a3de8; transform: translateY(-2px); }
+    button::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    button:hover::before { left: 100%; }
+    .btn-outline {
+      background: transparent; border: 1px solid #7c4dff; color: #7c4dff;
+    }
+    .btn-outline:hover { background: #7c4dff; color: white; }
+    .scroll-list {
+      max-height: 280px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+      padding-right: 5px;
+      scrollbar-width: thin;
+    }
+    .scroll-list::-webkit-scrollbar { width: 5px; }
+    .scroll-list::-webkit-scrollbar-track { background: #e0d4f5; border-radius: 10px; }
+    .scroll-list::-webkit-scrollbar-thumb { background: #9b6bcc; border-radius: 10px; }
+    .fav-item, .community-item {
+      background: white;
+      border-radius: 20px;
+      padding: 0.8rem;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s;
+    }
+    .fav-item { display: flex; justify-content: space-between; align-items: center; }
+    .fav-item:hover, .community-item:hover { transform: translateX(4px); }
+    .remove-fav { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 1rem; padding: 0 8px; width: auto; margin: 0; }
+    .remove-fav:hover { color: #ff4757; transform: scale(1.1); background: none; }
+    .quote-meta { font-size: 0.7rem; color: #a28fc2; margin-top: 0.3rem; }
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 30px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .badge-daily {
+      background: #f0e6ff;
+      color: #7c4dff;
+      border: 1px solid #c9a6ff;
+    }
+    .badge-community {
+      background: #e6fff4;
+      color: #2e9e6b;
+      border: 1px solid #9be8c5;
+    }
+    hr { margin: 1rem 0; border-color: rgba(0,0,0,0.05); }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #1e1428e6; color: white; padding: 10px 24px; border-radius: 40px;
+      font-size: 0.85rem; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 1000;
+    }
+    .toast.show { opacity: 1; }
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: #f0e6ff;
+      color: #7c4dff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .tab-btn:hover, .tab-btn.active {
+      background: #7c4dff;
+      color: white;
+      transform: none;
+    }
+    .tab-btn::before { display: none; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
+    .count-badge {
+      background: #7c4dff;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    @media (max-width: 550px) { .card { padding: 1.5rem; } .quote-text { font-size: 1.2rem; } .action-buttons { gap: 0.5rem; } button { padding: 6px 12px; font-size: 0.8rem; } }
+  </style>
+</head>
+<body>
+  <div class="rotating-glow"></div><div class="rotating-ring"></div>
+  <div class="floating-bg">
+    <div class="orb-bg orb1"></div><div class="orb-bg orb2"></div><div class="orb-bg orb3"></div>
+    <div class="float-item">✨</div><div class="float-item">❤️</div><div class="float-item">🌟</div>
+    <div class="float-item">🕊️</div><div class="float-item">⭐</div><div class="float-item">💖</div>
+  </div>
+  <div class="stars" id="stars"></div>
+  <div class="dashboard-container" id="dashboardContainer"></div>
+  <div id="toastMsg" class="toast"></div>
+
+  <script>
+    const STORAGE_CURRENT_USER = 'whisper_current_user';
+    const STORAGE_FAVS = 'whisper_favs_';
+    const STORAGE_DAILY = 'whisper_daily_quote';
+    const STORAGE_COMMUNITY = 'creator_quotes';
+
+    let currentUser = null;
+    let currentDailyQuote = null;
+    let communityQuotes = [];
+    let allQuotes = [];
+    let currentFilter = 'all';
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    // Load community quotes from localStorage (always fresh)
+    function loadCommunityQuotes() {
+      const stored = localStorage.getItem(STORAGE_COMMUNITY);
+      if (stored) {
+        communityQuotes = JSON.parse(stored);
+      } else {
+        // Default quotes if none exist
+        communityQuotes = [
+          { id: Date.now()+1, text: "The only limit is your mind.", author: "Anonymous", creatorName: "Daily Whisper", timestamp: Date.now() },
+          { id: Date.now()+2, text: "Every day is a new beginning.", author: "Daily Whisper", creatorName: "Daily Whisper", timestamp: Date.now() }
+        ];
+        localStorage.setItem(STORAGE_COMMUNITY, JSON.stringify(communityQuotes));
+      }
+    }
+
+    function buildAllQuotes() {
+      allQuotes = [];
+      if (currentDailyQuote) {
+        allQuotes.push({ ...currentDailyQuote, _type: 'daily' });
+      }
+      communityQuotes.forEach(q => {
+        allQuotes.push({ ...q, _type: 'community' });
+      });
+    }
+
+    function getFilteredQuotes() {
+      if (currentFilter === 'daily') return allQuotes.filter(q => q._type === 'daily');
+      if (currentFilter === 'community') return allQuotes.filter(q => q._type === 'community');
+      return allQuotes;
+    }
+
+    function renderAllQuotesList() {
+      const container = document.getElementById('allQuotesList');
+      if (!container) return;
+      const allCount = document.getElementById('countAll');
+      const communityCount = document.getElementById('countCommunity');
+      const dailyCount = document.getElementById('countDaily');
+      if (allCount) allCount.textContent = allQuotes.length;
+      if (communityCount) communityCount.textContent = communityQuotes.length;
+      if (dailyCount) dailyCount.textContent = currentDailyQuote ? 1 : 0;
+      const filtered = getFilteredQuotes();
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#999;">No quotes found.</p>';
+        return;
+      }
+      container.innerHTML = filtered.map(q => `
+        <div class="community-item" style="border-left: 3px solid ${q._type === 'daily' ? '#7c4dff' : '#2e9e6b'};">
+          <div>
+            <strong>"${escapeHtml(q.text)}"</strong>
+            <span class="badge ${q._type === 'daily' ? 'badge-daily' : 'badge-community'}">
+              ${q._type === 'daily' ? '✨ Daily' : '🌍 Community'}
+            </span>
+          </div>
+          <div style="font-size:0.85rem; color:#6b4f8f; margin-top:4px;">— ${escapeHtml(q.author)}</div>
+          ${q.creatorName ? `<div class="quote-meta">Posted by: ${escapeHtml(q.creatorName)}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // Favorites
+    function getFavKey() { return STORAGE_FAVS + (currentUser ? currentUser.email : 'guest'); }
+    function loadFavorites() {
+      if (!currentUser) return [];
+      const stored = localStorage.getItem(getFavKey());
+      return stored ? JSON.parse(stored) : [];
+    }
+    function saveFavorites(favs) { localStorage.setItem(getFavKey(), JSON.stringify(favs)); }
+
+    // Daily quote
+    const fallbackQuotes = [
+      { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+      { text: "Keep your face always toward the sunshine.", author: "Walt Whitman" },
+      { text: "Act as if what you do makes a difference.", author: "William James" }
+    ];
+    async function fetchRandomQuote() {
+      try {
+        const res = await fetch('https://api.quotable.io/random');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        return { text: data.content, author: data.author };
+      } catch(e) {
+        return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+      }
+    }
+    function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+    async function getDailyQuote() {
+      const cached = localStorage.getItem(STORAGE_DAILY);
+      if (cached) {
+        const obj = JSON.parse(cached);
+        if (obj.date === getTodayStr()) return { text: obj.text, author: obj.author };
+      }
+      const fresh = await fetchRandomQuote();
+      localStorage.setItem(STORAGE_DAILY, JSON.stringify({ date: getTodayStr(), text: fresh.text, author: fresh.author }));
+      return fresh;
+    }
+
+    async function renderDashboard() {
+      if (!currentUser) return;
+      if (!currentDailyQuote) currentDailyQuote = await getDailyQuote();
+      document.getElementById('quoteText').innerHTML = `<i class="fas fa-quote-left"></i> ${escapeHtml(currentDailyQuote.text)} <i class="fas fa-quote-right"></i>`;
+      document.getElementById('quoteAuthor').textContent = `— ${escapeHtml(currentDailyQuote.author)} —`;
+
+      const favs = loadFavorites();
+      const favContainer = document.getElementById('favList');
+      if (favs.length === 0) {
+        favContainer.innerHTML = '<p style="text-align:center;">❤️ No favorites yet. Tap heart to save.</p>';
+      } else {
+        favContainer.innerHTML = favs.map((fav, idx) => `
+          <div class="fav-item">
+            <div><strong>"${escapeHtml(fav.text)}"</strong><br>— ${escapeHtml(fav.author)}</div>
+            <button class="remove-fav" data-idx="${idx}"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        `).join('');
+        document.querySelectorAll('.remove-fav').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            const newFavs = loadFavorites();
+            newFavs.splice(idx, 1);
+            saveFavorites(newFavs);
+            renderDashboard();
+            showToast('Removed from favorites');
+          });
+        });
+      }
+
+      const isFaved = loadFavorites().some(f => f.text === currentDailyQuote.text && f.author === currentDailyQuote.author);
+      const favBtn = document.getElementById('favBtn');
+      if (isFaved) favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorited';
+      else favBtn.innerHTML = '<i class="far fa-heart"></i> Favorite';
+
+      loadCommunityQuotes();     // always reload from storage
+      buildAllQuotes();
+      renderAllQuotesList();
+    }
+
+    function shareQuote() {
+      if (!currentDailyQuote) return;
+      const content = `"${currentDailyQuote.text}" — ${currentDailyQuote.author}`;
+      if (navigator.share) navigator.share({ title: 'Daily Whisper', text: content }).catch(() => fallbackCopy(content));
+      else fallbackCopy(content);
+    }
+    function fallbackCopy(text) { navigator.clipboard.writeText(text); showToast('📋 Copied to clipboard!'); }
+
+    function toggleFavorite() {
+      if (!currentDailyQuote) return;
+      const favs = loadFavorites();
+      const existingIndex = favs.findIndex(f => f.text === currentDailyQuote.text && f.author === currentDailyQuote.author);
+      if (existingIndex !== -1) {
+        favs.splice(existingIndex, 1);
+        saveFavorites(favs);
+        showToast('Removed from favorites');
+      } else {
+        favs.unshift({ text: currentDailyQuote.text, author: currentDailyQuote.author });
+        saveFavorites(favs);
+        showToast('✨ Added to favorites');
+      }
+      renderDashboard();
+    }
+
+    // REFRESH BUTTON: new daily quote + reload community quotes + rebuild all
+    async function refreshQuote() {
+      const btn = document.getElementById('refreshBtn');
+      if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...'; btn.disabled = true; }
+
+      // Get new daily quote
+      currentDailyQuote = await fetchRandomQuote();
+      localStorage.setItem(STORAGE_DAILY, JSON.stringify({
+        date: getTodayStr(),
+        text: currentDailyQuote.text,
+        author: currentDailyQuote.author
+      }));
+
+      // Force reload community quotes from localStorage
+      loadCommunityQuotes();
+      buildAllQuotes();
+      
+      // Re-render everything
+      await renderDashboard();
+      
+      if (btn) { btn.innerHTML = '<i class="fas fa-sync-alt"></i> New'; btn.disabled = false; }
+      showToast('🔄 Daily quote refreshed & community quotes reloaded!');
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const activeTab = document.getElementById('tab-' + filter);
+      if (activeTab) activeTab.classList.add('active');
+      renderAllQuotesList();
+    }
+
+    function logout() {
+      localStorage.removeItem(STORAGE_CURRENT_USER);
+      window.location.href = 'login.html';
+    }
+
+    function checkLogin() {
+      const stored = localStorage.getItem(STORAGE_CURRENT_USER);
+      if (!stored) {
+        document.getElementById('dashboardContainer').innerHTML = `
+          <div class="card" style="text-align:center;">
+            <i class="fas fa-exclamation-triangle" style="font-size:3rem; color:#ff6b6b;"></i>
+            <h2>Not Logged In</h2>
+            <p style="margin:1rem 0;">Please login to access the Quote User Dashboard.</p>
+            <button onclick="window.location.href='login.html'" style="width:auto; padding:10px 24px;">Go to Login</button>
+          </div>
+        `;
+        return false;
+      }
+      currentUser = JSON.parse(stored);
+      if (!currentUser.name) currentUser.name = currentUser.email.split('@')[0];
+      document.getElementById('dashboardContainer').innerHTML = `
+        <div class="card">
+          <div class="flex-between">
+            <h2><i class="fas fa-book-reader"></i> Quote User Dashboard</h2>
+            <button id="logoutBtn" class="btn-outline" style="width:auto; padding:4px 12px;">Logout</button>
+          </div>
+          <div class="quote-text" id="quoteText">Loading...</div>
+          <div class="quote-author" id="quoteAuthor"></div>
+          <div class="action-buttons">
+            <button id="shareBtn"><i class="fas fa-share-alt"></i> Share</button>
+            <button id="favBtn"><i class="far fa-heart"></i> Favorite</button>
+            <button id="refreshBtn"><i class="fas fa-sync-alt"></i> New</button>
+          </div>
+          <hr>
+          <div class="section-header">
+            <h3><i class="fas fa-globe"></i> All Quotes</h3>
+            <span class="count-badge" id="countAll">0</span>
+          </div>
+          <div class="tabs">
+            <button class="tab-btn active" id="tab-all" onclick="setFilter('all')">🌐 All</button>
+            <button class="tab-btn" id="tab-daily" onclick="setFilter('daily')">✨ Daily <span id="countDaily" style="background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 6px;font-size:0.7rem;"></span></button>
+            <button class="tab-btn" id="tab-community" onclick="setFilter('community')">🌍 Community <span id="countCommunity" style="background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 6px;font-size:0.7rem;"></span></button>
+          </div>
+          <div id="allQuotesList" class="scroll-list">Loading...</div>
+          <hr>
+          <h3>❤️ Your Favorites</h3>
+          <div id="favList" class="scroll-list">Loading...</div>
+        </div>
+      `;
+      return true;
+    }
+
+    // Stars
+    const starsDiv = document.getElementById('stars');
+    for (let i = 0; i < 150; i++) {
+      const s = document.createElement('div'); s.classList.add('star');
+      s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%';
+      s.style.animationDelay = Math.random() * 5 + 's'; s.style.width = (Math.random() * 3 + 1) + 'px';
+      s.style.height = s.style.width; starsDiv.appendChild(s);
+    }
+
+    if (checkLogin()) {
+      renderDashboard().then(() => {
+        document.getElementById('shareBtn').addEventListener('click', shareQuote);
+        document.getElementById('favBtn').addEventListener('click', toggleFavorite);
+        document.getElementById('refreshBtn').addEventListener('click', refreshQuote);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+      });
+    }
+  </script>
+</body>
+</html>
