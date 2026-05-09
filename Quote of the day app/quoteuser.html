@@ -244,13 +244,11 @@
       return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // Load community quotes from localStorage (always fresh)
     function loadCommunityQuotes() {
       const stored = localStorage.getItem(STORAGE_COMMUNITY);
       if (stored) {
         communityQuotes = JSON.parse(stored);
       } else {
-        // Default quotes if none exist
         communityQuotes = [
           { id: Date.now()+1, text: "The only limit is your mind.", author: "Anonymous", creatorName: "Daily Whisper", timestamp: Date.now() },
           { id: Date.now()+2, text: "Every day is a new beginning.", author: "Daily Whisper", creatorName: "Daily Whisper", timestamp: Date.now() }
@@ -303,7 +301,6 @@
       `).join('');
     }
 
-    // Favorites
     function getFavKey() { return STORAGE_FAVS + (currentUser ? currentUser.email : 'guest'); }
     function loadFavorites() {
       if (!currentUser) return [];
@@ -312,7 +309,6 @@
     }
     function saveFavorites(favs) { localStorage.setItem(getFavKey(), JSON.stringify(favs)); }
 
-    // Daily quote
     const fallbackQuotes = [
       { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
       { text: "Keep your face always toward the sunshine.", author: "Walt Whitman" },
@@ -374,7 +370,7 @@
       if (isFaved) favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorited';
       else favBtn.innerHTML = '<i class="far fa-heart"></i> Favorite';
 
-      loadCommunityQuotes();     // always reload from storage
+      loadCommunityQuotes();   
       buildAllQuotes();
       renderAllQuotesList();
     }
@@ -403,12 +399,10 @@
       renderDashboard();
     }
 
-    // REFRESH BUTTON: new daily quote + reload community quotes + rebuild all
     async function refreshQuote() {
       const btn = document.getElementById('refreshBtn');
       if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...'; btn.disabled = true; }
 
-      // Get new daily quote
       currentDailyQuote = await fetchRandomQuote();
       localStorage.setItem(STORAGE_DAILY, JSON.stringify({
         date: getTodayStr(),
@@ -416,11 +410,9 @@
         author: currentDailyQuote.author
       }));
 
-      // Force reload community quotes from localStorage
       loadCommunityQuotes();
       buildAllQuotes();
       
-      // Re-render everything
       await renderDashboard();
       
       if (btn) { btn.innerHTML = '<i class="fas fa-sync-alt"></i> New'; btn.disabled = false; }
@@ -487,7 +479,6 @@
       return true;
     }
 
-    // Stars
     const starsDiv = document.getElementById('stars');
     for (let i = 0; i < 150; i++) {
       const s = document.createElement('div'); s.classList.add('star');
