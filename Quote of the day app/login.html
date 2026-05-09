@@ -19,7 +19,6 @@
       overflow: hidden;
       background: #0a0a2a;
     }
-    /* Rotating circular glow (vedam) */
     .rotating-glow {
       position: fixed; top: 50%; left: 50%;
       width: 600px; height: 600px;
@@ -45,7 +44,7 @@
       pointer-events: none;
     }
     @keyframes spinRingReverse { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
-    /* Floating positive elements */
+
     .floating-bg {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
     }
@@ -186,7 +185,6 @@
           <button id="showRegisterBtnFromLogin" class="btn-outline">Register</button>
         </div>
       </div>
-      <!-- REGISTER FORM (hidden initially) -->
       <div id="registerForm" class="hidden-form">
         <div class="input-group"><label><i class="fas fa-user"></i> FULL NAME</label><input type="text" id="regName" placeholder="Your name"></div>
         <div class="input-group"><label><i class="fas fa-envelope"></i> EMAIL</label><input type="email" id="regEmail" placeholder="you@example.com"></div>
@@ -200,7 +198,6 @@
   </div>
   <div id="toastMsg" class="toast"></div>
   <script>
-    // Generate twinkling stars
     const starsDiv = document.getElementById('stars');
     for (let i = 0; i < 150; i++) {
       const s = document.createElement('div'); s.classList.add('star');
@@ -212,7 +209,6 @@
       starsDiv.appendChild(s);
     }
 
-    // Role selection logic (user / creator)
     let selectedRole = 'user';
     const roleCards = document.querySelectorAll('.role-card');
     const portalDiv = document.getElementById('portalActive');
@@ -227,7 +223,6 @@
     roleCards.forEach(card => card.addEventListener('click', () => updateRole(card.dataset.role)));
     updateRole('user');
 
-    // Toggle between login and register forms
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     document.getElementById('showRegisterBtnFromLogin').addEventListener('click', () => {
@@ -240,7 +235,6 @@
       registerForm.classList.add('hidden-form');
     });
 
-    // Toast helper
     function showToast(msg) {
       const toast = document.getElementById('toastMsg');
       toast.textContent = msg;
@@ -248,7 +242,6 @@
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    // Heart meter for registration (fills as user completes fields)
     function updateHeartMeter() {
       const name = document.getElementById('regName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
@@ -267,7 +260,6 @@
     );
     updateHeartMeter();
 
-    // LOGIN action
     document.getElementById('signInBtn').addEventListener('click', () => {
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPass').value;
@@ -287,7 +279,6 @@
       }, 1500);
     });
 
-    // REGISTER action
     document.getElementById('registerBtn').addEventListener('click', () => {
       const name = document.getElementById('regName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
@@ -302,12 +293,10 @@
       users.push({ name, email, password, role: selectedRole });
       localStorage.setItem('whisper_users', JSON.stringify(users));
       showToast('🎉 Registration successful! Please login.');
-      // Switch back to login form and pre‑fill email
       loginForm.classList.remove('hidden-form');
       registerForm.classList.add('hidden-form');
       document.getElementById('loginEmail').value = email;
       document.getElementById('loginPass').value = '';
-      // Clear registration fields
       document.getElementById('regName').value = '';
       document.getElementById('regEmail').value = '';
       document.getElementById('regPass').value = '';
